@@ -485,6 +485,16 @@
         let storeData = {};
         let headerData = {};
 
+        // Helper function to slugify strings
+        function slugify(text) {
+            return text.toString().toLowerCase()
+                .replace(/\s+/g, '-')           // Replace spaces with -
+                .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+                .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+                .replace(/^-+/, '')             // Trim - from start of text
+                .replace(/-+$/, '');            // Trim - from end of text
+        }
+
         // Initialize the application
         document.addEventListener("DOMContentLoaded", function() {
             loadData();
@@ -501,12 +511,13 @@
                 // Load store data
                 const storeResponse = await fetch("store.json");
                 storeData = await storeResponse.json();
-                 // Add flag variable to each item
+                 // Add flag variable to each item and a unique ID
                  if (Array.isArray(storeData.items)) {
-                storeData.items.forEach(item => {
-                item.flag = false; // Add your default flag value here
-                });
-        }
+                    storeData.items.forEach(item => {
+                        item.flag = false; // Add your default flag value here
+                        item.id = slugify(item.name); // Generate ID for each item
+                    });
+                }
                 createCategoryNavigation();
                 renderMenu();
 
@@ -591,7 +602,7 @@
 
         // Render individual dish item
         function renderDishItem(dish) {
-            const isonsale = dish.onsale === true;
+            const isveg = dish.veg === true;
             const stars = generateStars(dish.rating || 0);
             const currentHour = new Date().getHours();
             const isAvailable = currentHour >= (dish.startTime || 0) && currentHour < (dish.endTime || 24);
@@ -604,11 +615,14 @@
                 <div class="dish">
                     <div class="dish-content">
                         <div class="dish-details">
-                            <h3 class="dish-name">${dish.name || 'Unknown Dish'}</h3>
+                            <h3 class="dish-name">
+                                <a href="product.html?id=${dish.id}">${dish.name || 'Unknown Dish'}</a>
+                            </h3>
                             <div class="dish-pricing">
                                 <span class="dish-price">₹${dish.price || 0}</span>
-                                ${dish.price ? `<span class="original-price">₹${Math.round(dish.price * 1.11)}</span>` : ''}
-                                <span class="offer">${dish.offer || ""}</span>
+
+                                ${dish.price ? `<span class="original-price">₹${Math.floor(dish.price * (1 + ((typeof dish.offer === 'number' && dish.offer >= 1 && dish.offer <= 99 ? dish.offer : 1) / 100)))}</span>` : ''}
+                                <span class="offer">${dish.offer}% OFF</span>
                             </div>
                             ${stars ? `<div class="dish-rating">${stars} (${dish.rating})</div>` : ''}
                             <p class="dish-description" 
@@ -706,7 +720,7 @@
         function showOnlyFlaggedDishes() {
     // Loop through all dish elements
     document.querySelectorAll('.dish').forEach(dishDiv => {
-        const nameElem = dishDiv.querySelector('.dish-name');
+        const nameElem = dishDiv.querySelector('.dish-name a'); // Adjusted selector for the link
         const priceElem = dishDiv.querySelector('.dish-price');
         if (!nameElem || !priceElem) return;
 
@@ -907,8 +921,3 @@ function updateCartUI() {
 </body>
 
 </html>
-
-
-
-
-
