@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
 fetch('header.json')
     .then(response => response.json())
     .then(data => {
-        document.querySelector('.restaurant-name').textContent = data.restaurantName;
+        document.querySelector('.restaurant-name').textContent = data.storeName;
         document.querySelector('.restaurant-details').textContent = `${data.address} | ${data.contact}`;
     })
     .catch(error => console.error('Error loading header data:', error));
@@ -324,7 +324,7 @@ let upiId = "";
 fetch("header.json")
     .then(response => response.json())
     .then(data => {
-        document.querySelector(".restaurant-name").textContent = data.restaurantName;
+        document.querySelector(".restaurant-name").textContent = data.storeName;
         document.querySelector(".restaurant-details").textContent = `${data.address} | ${data.contact}`;
         whatsappNumber = data.whatsappNumber;
         upiId = data.upiId;
